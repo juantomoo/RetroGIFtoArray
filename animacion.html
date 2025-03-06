@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Animación Retro con Mapas de Bits</title>
+  <style>
+    body {
+      margin: 0;
+      background: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    canvas {
+      /* Forzamos a verse pixelado */
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      /* Ampliamos el canvas 16×12 a, por ejemplo, 320×240 */
+      width: 320px;
+      height: 240px;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+<canvas id="pixelCanvas"></canvas>
+<script>
+  // ========================================================
+  // 1) CONFIGURACIÓN DEL "LIENZO" EN BAJA RESOLUCIÓN
+  // ========================================================
+  const WIDTH = 16;  // ancho en píxeles
+  const HEIGHT = 12; // alto en píxeles
+
+  const canvas = document.getElementById('pixelCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // Ajustamos el tamaño interno del canvas a 16×12
+  canvas.width = WIDTH;
+  canvas.height = HEIGHT;
+
+  // ========================================================
+  // 2) DEFINIMOS UNA PEQUEÑA PALETA DE COLORES (Índices 0..4)
+  // ========================================================
+  const palette = [
+    '#000000', // 0 = negro (lo usaremos para el gato)
+    '#2e1b3e', // 1 = púrpura oscuro (fondo)
+    '#57366c', // 2 = púrpura medio (nubes/bosque)
+    '#9e4f9a', // 3 = púrpura rosado (madera/relieve)
+    '#ffffff', // 4 = blanco (estrellas, detalles)
+  ];
+
+  // ========================================================
+  // 3) DEFINIMOS LOS FOTOGRAMAS (MAPAS DE BITS)
+  // Cada frame es un array de HEIGHT filas,
+  // donde cada fila tiene WIDTH índices de color.
+  // ========================================================
+  // Para simplificar, el “escenario” se mantiene igual,
+  // y sólo cambiaremos algunos píxeles (estrellas, detalles del gato)
+  // para simular una animación. Usamos 3 frames.
+  //
+  // Leyenda rápida:
+  // - 1 = fondo púrpura oscuro
+  // - 2 = silueta de bosques/nubes al fondo
+  // - 3 = madera/tabla donde está el gato
+  // - 0 = silueta de gato
+  // - 4 = estrellas/detalles
+  //
+  // NOTA: Esto es un ejemplo minimalista, no pretende ser exacto.
+  //       La matriz es pequeña (16x12), así que la forma es muy abstracta.
+
+  // Frame 1
+  const frame1 = [
+    [1,1,1,1,1,4,1,1,1,1,4,1,1,1,1,1], // Fila 0
+    [1,1,1,1,1,1,1,1,1,4,1,1,1,1,4,1], // Fila 1
+    [1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1], // Fila 2
+    [1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1], // Fila 3
+    [1,2,2,2,2,2,2,1,2,2,2,2,2,1,1,1], // Fila 4
+    [1,2,2,2,2,2,2,1,2,2,2,2,2,1,1,1], // Fila 5
+    [1,1,1,3,3,3,1,1,1,3,3,3,1,1,1,1], // Fila 6 (tabla izq y dcha)
+    [1,1,1,3,3,3,1,1,1,3,3,3,1,1,1,1], // Fila 7
+    [1,1,1,3,3,3,1,0,0,3,3,3,1,1,1,1], // Fila 8 (gato - parte inferior)
+    [1,1,1,3,3,3,0,0,0,3,3,3,1,1,1,1], // Fila 9 (gato)
+    [1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1], // Fila 10 (gato cabeza)
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // Fila 11
+  ];
+
+  // Frame 2 (cambiamos un par de estrellas, y el gato un pixel en la cola)
+  const frame2 = [
+    [1,1,1,1,4,1,1,1,1,1,4,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1,4,1,1,1,1,4,1,1],
+    [1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1],
+    [1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1],
+    [1,2,2,2,2,2,2,1,2,2,2,2,2,1,1,1],
+    [1,2,2,2,2,2,2,1,2,2,2,2,2,1,1,1],
+    [1,1,1,3,3,3,1,1,1,3,3,3,1,1,1,1],
+    [1,1,1,3,3,3,1,1,1,3,3,3,1,1,1,1],
+    [1,1,1,3,3,3,1,0,0,3,3,3,1,1,1,1],
+    [1,1,1,3,3,3,0,0,0,3,3,3,1,1,1,1],
+    [1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1], // un pixel de la cola sube
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  ];
+
+  // Frame 3 (otra variación de estrellas y cola)
+  const frame3 = [
+    [1,1,1,4,1,1,1,1,1,4,1,1,1,1,1,1],
+    [1,1,1,1,1,1,4,1,1,1,1,1,4,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1],
+    [1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1],
+    [1,2,2,2,2,2,2,1,2,2,2,2,2,1,1,1],
+    [1,2,2,2,2,2,2,1,2,2,2,2,2,1,1,1],
+    [1,1,1,3,3,3,1,1,1,3,3,3,1,1,1,1],
+    [1,1,1,3,3,3,1,1,1,3,3,3,1,1,1,1],
+    [1,1,1,3,3,3,1,0,0,3,3,3,1,1,1,1],
+    [1,1,1,3,3,3,0,0,0,3,3,3,1,1,1,1],
+    [1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1], // cola cambia de nuevo
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  ];
+
+  // Un array con todos los frames
+  const frames = [frame1, frame2, frame3];
+
+  // ========================================================
+  // 4) FUNCIÓN PARA DIBUJAR UN FRAME EN EL CANVAS
+  // ========================================================
+  function drawFrame(frameData) {
+    for (let y = 0; y < HEIGHT; y++) {
+      for (let x = 0; x < WIDTH; x++) {
+        const colorIndex = frameData[y][x];
+        ctx.fillStyle = palette[colorIndex];
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+
+  // ========================================================
+  // 5) BUCLE DE ANIMACIÓN: CICLAMOS ENTRE LOS 3 FRAMES
+  // ========================================================
+  let currentFrame = 0;
+  let lastTime = 0;
+  const fps = 6; // ~6 fotogramas por segundo
+  const frameDuration = 1000 / fps; // milisegundos por frame
+
+  function animate(timestamp) {
+    const delta = timestamp - lastTime;
+    if (delta >= frameDuration) {
+      lastTime = timestamp;
+      currentFrame = (currentFrame + 1) % frames.length;
+      drawFrame(frames[currentFrame]);
+    }
+    requestAnimationFrame(animate);
+  }
+
+  // Iniciamos dibujando el primer frame
+  drawFrame(frames[currentFrame]);
+  requestAnimationFrame(animate);
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+    "name": "giftoarray",
+    "version": "1.0.0",
+    "description": "Convierte GIFs a archivos binarios optimizados",
+    "main": "GIFtoArray.js",
+    "dependencies": {
+      "gif-frames": "^1.0.1",
+      "pngjs": "^6.0.0"
+    },
+    "scripts": {
+      "start": "node GIFtoArray.js"
+    },
+    "author": "",
+    "license": "MIT"
+  }
+  
