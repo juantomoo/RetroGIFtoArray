@@ -20,7 +20,7 @@
         }
 
         async function displayAnimation() {
-            const data = await loadBinaryFile('pixels.bin');
+            const data = await loadBinaryFile('result.bin');
 
             const width = data.getUint16(0, true);
             const height = data.getUint16(2, true);

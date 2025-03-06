@@ -1,16 +1,28 @@
 {
-    "name": "giftoarray",
-    "version": "1.0.0",
-    "description": "Convierte GIFs a archivos binarios optimizados",
-    "main": "GIFtoArray.js",
-    "dependencies": {
-      "gif-frames": "^1.0.1",
-      "pngjs": "^6.0.0"
-    },
-    "scripts": {
-      "start": "node GIFtoArray.js"
-    },
-    "author": "",
-    "license": "MIT"
-  }
-  
+  "name": "giftoarray",
+  "version": "1.1.1",
+  "description": "Convierte GIFs a archivos binarios optimizados y simplificados. También permite reducir GIFs animados para mejorar su eficiencia.",
+  "main": "GIFtoArray.js",
+  "dependencies": {
+    "gif-frames": "^1.0.1",
+    "pngjs": "^6.0.0",
+    "gifencoder": "^2.0.1",
+    "readline-sync": "^1.4.10"
+  },
+  "scripts": {
+    "start": "node GIFtoArray.js",
+    "simplify": "node GIFSimply.js",
+    "install-deps": "npm install"
+  },
+  "keywords": [
+    "GIF",
+    "binario",
+    "optimización",
+    "retro",
+    "pixel-art",
+    "gif-to-array",
+    "gif-simplifier"
+  ],
+  "author": "Tomoo",
+  "license": "MIT"
+}
