@@ -22,18 +22,16 @@
         async function displayAnimation() {
             const data = await loadBinaryFile('pixels.bin');
 
-            // ✅ CORRECCIÓN: Leer width y height como enteros de 16 bits (2 bytes cada uno)
             const width = data.getUint16(0, true);
             const height = data.getUint16(2, true);
             const frameDuration = data.getUint16(4, true);
             const totalPixels = width * height;
-            const frameSize = totalPixels * 3; // Cada píxel tiene 3 bytes (RGB)
-            const totalFrames = (data.byteLength - 6) / frameSize; // Restamos los 6 bytes de metadatos
+            const frameSize = totalPixels * 3;
+            const totalFrames = (data.byteLength - 6) / frameSize;
 
             console.log(`📂 Archivo BIN cargado`);
             console.log(`📏 Resolución: ${width}x${height}`);
             console.log(`🎞️ Total de frames: ${totalFrames}`);
-            console.log(`⏳ Duración de cada frame: ${frameDuration}ms`);
 
             const canvas = document.getElementById("canvas");
             canvas.width = width;
@@ -44,14 +42,9 @@
             let currentFrame = 0;
 
             function renderFrame() {
-                const frameStart = 6 + currentFrame * frameSize; // ⬅️ Saltamos los 6 bytes de metadatos
-                let pixelIndex = 0;
-
+                let frameStart = 6 + currentFrame * frameSize;
                 for (let i = 0; i < frameSize; i += 3) {
-                    imageData.data[pixelIndex++] = data.getUint8(frameStart + i);     // R
-                    imageData.data[pixelIndex++] = data.getUint8(frameStart + i + 1); // G
-                    imageData.data[pixelIndex++] = data.getUint8(frameStart + i + 2); // B
-                    imageData.data[pixelIndex++] = 255; // Alpha (opaco)
+                    imageData.data.set([data.getUint8(frameStart + i), data.getUint8(frameStart + i + 1), data.getUint8(frameStart + i + 2), 255], i * 4 / 3);
                 }
 
                 ctx.putImageData(imageData, 0, 0);
